@@ -1,0 +1,30 @@
+
+.header{
+    margin-top:100px;
+    margin-left:500px;
+    display: block;
+}
+.heading {
+margin-left:60px;
+  color:#427df4;
+}
+.tasks{
+  width:500px;
+  margin-left: 400px;
+  display:flex;
+  flex-flow: row nowrap;
+  margin-top: 5px;
+}
+
+.label{
+  display: flex;
+  width:300px;
+  
+}
+#in{
+  size:40;
+}
+#todolist {
+  list-style-type:  none;
+}
+
