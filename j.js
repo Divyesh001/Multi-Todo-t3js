@@ -12,21 +12,22 @@ Application.addService('todoservice',function(){
     main=JSON.parse(sessionStorage.getItem('main'));
   }
 
+  if(!sessionStorage.getItem('filter')){
+    filter="all";
+  }
+  else{
+    filter=sessionStorage.getItem('filter');
+  }
+
 
 return{
-  isEmpty:function(){
-    return Object.keys(main).length === 0;
-  },
-
-  addEmptyList:function(cid){
-    main[cid]={};
-    main[cid].taskid=0;
-    main[cid].task={};
-    main[cid].filter='all';
-    sessionStorage.setItem('main',JSON.stringify(main));
-    console.log(main);
-  },
   add: function(title,cid){
+    if(!main[cid]){
+      main[cid]={};
+      main[cid].taskid=0;
+      main[cid].task={};
+      main[cid].filter='all';
+    }
     var taskid=main[cid].taskid;
     var index=taskid;
   //  console.log("sjhdjshdjs "+ index);
@@ -37,7 +38,6 @@ return{
     };
     main[cid].taskid++;
     sessionStorage.setItem('main',JSON.stringify(main));
-    console.log(main);
     return index;
   },
 
@@ -53,13 +53,13 @@ return{
   getlist: function(cid){
     var tasklist=[];
     Object.keys(main[cid].task).forEach(function(id){
-      if(main[cid].filter==="all"){
+      if(filter==="all"){
         tasklist.push(main[cid].task[id]);
       }
-      else if(main[cid].filter==="complete" && main[cid].task[id].complete){
+      else if(filter==="complete" && main[cid].task[id].complete){
         tasklist.push(main[cid].task[id]);
       }
-      else if(main[cid].filter==="incomplete" && !main[cid].task[id].complete){
+      else if(filter==="incomplete" && !main[cid].task[id].complete){
         tasklist.push(main[cid].task[id]);
       }
     });
@@ -82,8 +82,7 @@ return{
 
   applyFilter:function(filterType,cid){
     main[cid].filter=filterType;
-    sessionStorage.setItem('main',JSON.stringify(main));
-    console.log(main);
+    sessionStorage.setItem('main',main);
   },
 
    getFilter:function(cid){

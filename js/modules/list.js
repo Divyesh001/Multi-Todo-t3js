@@ -1,7 +1,7 @@
 Application.addModule('list',function(context){
   var todoser;
   var mod;
-  var lis;
+  var list;
 
   // function getCorrespondingli(element) {
   //
@@ -18,13 +18,15 @@ Application.addModule('list',function(context){
 
   return {
 
-    messages:['taskadded'],
+    messages:['taskadded','filterchanged','taskremoved'],
 
     init :function(){
       todoser=context.getService('todoservice');
       mod= context.getElement();
-      list=mod.querySelector('#todolist');
-      this.render();
+      list=mod.querySelector('.taskslist');
+      if(!todoser.isEmpty()){
+        this.render();
+      }
 
     },
     destroy : function(){
@@ -34,9 +36,10 @@ Application.addModule('list',function(context){
     },
 
     onmessage: function(name,data){
-      if(name === "taskadded" || name==="taskremoved"){
+      if(name === "taskadded" || name==="taskremoved" || name==='filterchanged'){
 
         this.render();
+        list.scrollTop = list.scrollHeight;
       }
     },
 
@@ -48,11 +51,16 @@ Application.addModule('list',function(context){
       var item = mod.querySelector('.todo-template li').cloneNode(true);
       item.querySelector('label').textContent=title;
       item.setAttribute('task-id',id);
+      if(complete){
+        item.querySelector('label').classList.add('completeTodo');
+        item.querySelector('input[type="checkbox"]').checked = true;
+        //console.log("hello");
+      }
       return item;
     },
 
     clearList: function() {
-       var list=mod.querySelector('#todolist');
+       var list=mod.querySelector('.taskslist');
 			while (list.hasChildNodes()) {
 				list.removeChild(list.lastChild);
 			}
@@ -61,7 +69,8 @@ Application.addModule('list',function(context){
     render :function(){
 
       this.clearList();
-      var tasklist= todoser.getlist();
+      var cid=mod.parentNode.getAttribute('id');
+      var tasklist= todoser.getlist(cid);
         if(tasklist.length >0){
         for (var i = 0; i < tasklist.length; i++) {
           list.appendChild(this.createItem(tasklist[i]));
@@ -69,20 +78,32 @@ Application.addModule('list',function(context){
       }
     },
 
-
+    onchange: function(event,element,elementType){
+      if(elementType==='complete-btn'){
+        var taskCheck=element.parentNode.parentNode.parentNode;
+        var id=taskCheck.getAttribute("task-id");
+        var cid=mod.parentNode.getAttribute('id');
+        if(element.checked){
+          todoser.markComplete(id,cid);
+        }
+        else{
+          todoser.markIncomplete(id,cid);
+        }
+        this.render();
+      }
+    },
 
     onclick: function(event, element, elementType) {
 
 			if (elementType === 'delete-btn') {
 				var taskDelete= element.parentNode.parentNode;
         var liId = taskDelete.getAttribute("task-id");
+        var cid=mod.parentNode.getAttribute('id');
 
-				mod.querySelector('#todolist').removeChild(taskDelete);
-				todoser.remove(liId);
+				mod.querySelector('.taskslist').removeChild(taskDelete);
+				todoser.remove(liId,cid);
 
-				context.broadcast('todoremoved', {
-					id: liId
-				});
+				;
 
 			}
 
